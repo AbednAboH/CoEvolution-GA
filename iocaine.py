@@ -146,13 +146,13 @@ class Iocaine:
 
 iocaine = None
 
-def iocaine_agent(observation, configuration):
+def iocaine_agent(index,lastOpponentAction):
     global iocaine
-    if observation.step == 0:
+    if index == 0:
         iocaine = Iocaine()
         act = iocaine.move(-1)
     else:
-        act = iocaine.move(observation.lastOpponentAction)
+        act = iocaine.move(lastOpponentAction)
         
     return act
 

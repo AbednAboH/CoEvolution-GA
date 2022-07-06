@@ -8,12 +8,12 @@
 
 # Python translation by Travis Erdman
 # https://github.com/erdman/roshambo
+from past.builtins import xrange
 
 
 def player(my_moves, opp_moves):
     import random
     from operator import itemgetter
-    from itertools import izip
     rps_to_text = ('rock','paper','scissors')
     rps_to_num  = {'rock':0, 'paper':1, 'scissors':2}
     wins_with = (1,2,0)      #superior
@@ -86,7 +86,7 @@ def player(my_moves, opp_moves):
         player.r_full_score[T%50] = [[[player.r_full_score[(T+49)%50][j][k][i] + score_table[(player.r_full[j][k] + i) % 3][player.opp_history[-1]] for i in xrange(3)] for k in xrange(2)] for j in xrange(24)]
         player.p_freq_score[T%50] = [[[player.p_freq_score[(T+49)%50][j][k][i] + score_table[(player.p_freq[j][k] + i) % 3][player.opp_history[-1]] for i in xrange(3)] for k in xrange(2)] for j in xrange(2)]
         player.r_freq_score[T%50] = [[[player.r_freq_score[(T+49)%50][j][k][i] + score_table[(player.r_freq[j][k] + i) % 3][player.opp_history[-1]] for i in xrange(3)] for k in xrange(2)] for j in xrange(2)]
-        player.s_len = [s + score_table[p][player.opp_history[-1]] for s,p in izip(player.s_len,player.p_len)]
+        player.s_len = [s + score_table[p][player.opp_history[-1]] for s,p in zip(player.s_len,player.p_len)]
 
 
     # update_history_hash()

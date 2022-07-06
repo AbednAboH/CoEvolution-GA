@@ -31,7 +31,7 @@ class algortithem:
         self.iter=[]
         self.solution2 = self.prob_spec()
 
-        self.sorting_networks=[]
+        self.parasites=[]
     def init_population(self):
         for i in range(self.pop_size):
             citizen = self.prob_spec()
@@ -51,7 +51,7 @@ class algortithem:
         self.pop_mean = mean / self.pop_size
 
     def sort_by_fitness(self,population):
-        return sorted(population,reverse=False)
+        return sorted(population,reverse=True)
 
 
 
@@ -81,7 +81,7 @@ class algortithem:
             self.iteration += 1
             self.algo(i)
             self.output.append(self.solution.fitness)
-            self.output2.append(self.solution2.fitness)
+
             self.iter.append(i)
             self.handle_prints_time()
             if self.stopage(i) or i==self.max_iter-1:
@@ -90,11 +90,11 @@ class algortithem:
                 break
 
 
-        return self.output,self.iter,self.solution,self.output2,self.solution2,self.sorting_networks,self.population
+        return self.output, self.iter, self.solution, self.output2, self.solution2, self.parasites, self.population
 
 
 # print_B = lambda x: print(f" Best:{len(x.object)} ,fittness: {x.fitness} ", end=" ")
-print_B = lambda x: print(f" Best:{ x } ,fittness: {x.fitness} ", end=" ")
+print_B = lambda x: print(f" Best:{ x } ,\nfittness: {x.fitness} ", end=" ")
 # print_B = lambda x: print(f" Best: {x.object} ,fittness: {x.fitness} ", end=" ")
 
 #  prints mean and variance
