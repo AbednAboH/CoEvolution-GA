@@ -177,7 +177,7 @@ def spacer(lines,f):
     d="-"*lines
     f.write(f"{d}\n")
 def create_results_file(name,results,streak):
-    f = open(fr"outputs\Results_{name}.txt", "a")
+    f = open(fr"outputs\{name}\Results_{name}.txt", "a")
     spaceforfirst=15
     fitnes=23
     all_lines=fitnes*3+spaceforfirst
@@ -304,18 +304,26 @@ def main2():
     results=[]
     match=Rashembo_Match()
     win_percentage=[]
+    print(f"\nPloting graph of fitness and saving to output file named{name}\n")
     plot(output, iter, name)
+    print("\nestablishing tournment agent vs all bots\n")
     for round in range(rounds):
         individual=match.Start_match(sol)
         results.append(individual.robots_score)
         win_percentage.append(individual.fitness)
+    print(f"\nall rounds are Complete ,fetching results to output file with name {name}:\n")
     create_results_file(name,results,win_percentage)
-    for _ in range(5):
+    print("tournment all against each other\n")
+    for j in range(5):
+        print(f"tournament #{j}\n")
         win_ratio,points=match.all_out_war(sol)
 
         for i in range(len(win_ratio)):
-            print(fr"{dict[i]}'s win ratio is {int(100*win_ratio[i])}% and it's average score is {points[i]}")
+            print(f"{dict[i]}'s win ratio is {int(100*win_ratio[i])}% and it's average score is {points[i]}")
         print("\n")
+    input("\npress any key to exit ...\n")
+
+
 if __name__ == "__main__":
 
     main2()
