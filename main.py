@@ -43,7 +43,7 @@ class Rashembo_Match:
 
         return score, score >= 0
 
-    def rashembo_match2(self, civilian, agent):
+    def match_Agent_greenberg(self, civilian, agent):
         rps_to_text = ('rock', 'paper', 'scissors')
         rps_to_num = {'rock': 0, 'paper': 1, 'scissors': 2}
         score = 0
@@ -55,16 +55,61 @@ class Rashembo_Match:
             greenberg_moves.append(move)
         return score, score >= 0
 
-    def rashembo_match3(self, civilian, agent):
+    def match_Agent_iocain(self, civilian, agent):
         score = 0
         for i in range(len(civilian.object)):
             move = iocaine_agent(i, civilian.object[i - 1])
             score += self.Winner(civilian.object[i], move)
         return score, score >= 0
+    def match_dummies_iocain(self):
+        score = 0
+        last_move=None
+        iocan=[]
+        dummy_history=[]
+        for dummy in self.dummies:
+            for i in range(1000):
+                move = iocaine_agent(i,last_move)
+                last_move=dummy.nextMove()
+                score += self.Winner(move,last_move)
+                dummy.storeMove(move, score)
+            iocan.append((score >= 0,dummy.getName(),score))
+            dummy_history.append((score < 0,"iocaine",-score))
+        return iocan,dummy_history
+    def match_dummies_greenberg(self):
+        rps_to_text = ('rock', 'paper', 'scissors')
+        rps_to_num = {'rock': 0, 'paper': 1, 'scissors': 2}
+        score = 0
+
+        green_=[]
+        dummy_history=[]
+        for dummy in self.dummies:
+            score = 0
+            greenberg_moves = []
+            my_moves = []
+            for i in range(1000):
+                move = player(my_moves[:i], greenberg_moves)
+                next=dummy.nextMove()
+                my_moves.append( rps_to_text[next])
+                score += self.Winner(rps_to_num[move],next)
+                greenberg_moves.append(move)
+            green_.append((score >= 0, dummy.getName(), score))
+            dummy_history.append((score < 0, "greenberg", -score))
+        return green_,dummy_history
 
     def init_dummies(self):
         for dummy in self.dummies:
             dummy.newGame(None)
+    def dummies_vs_dummies(self):
+        array=[[0]*len(self.dummies)]*len(self.dummies)
+        for i in range(len(self.dummies)):
+            for j in range(i,len(self.dummies)):
+                score=0
+                for _ in range(1000):
+                    score += self.Winner(self.dummies[i].nextMove(), self.dummies[j].nextMove())
+                array[i][j] =(score >= 0,self.dummies[j].getName(), score)
+                array[j][i] =(score < 0, self.dummies[i].getName(), -score)
+
+        return array
 
     def Start_match(self, individual):
 
@@ -75,29 +120,56 @@ class Rashembo_Match:
             score, winner = self.rashembo_match(individual, dummy)
             wins += winner
             robots.append((winner, dummy.getName(), score))
-        score, winner = self.rashembo_match2(individual, agent=None)
+        score, winner = self.match_Agent_greenberg(individual, agent=None)
         wins += winner
         robots.append((winner, "greenberg", score))
-        score, winner = self.rashembo_match3(individual, agent=None)
+        score, winner = self.match_Agent_iocain(individual, agent=None)
         wins += winner
         robots.append((winner, "iocaine", score))
         individual.fitness = wins / (len(self.dummies) + 2)
         individual.robots_score = robots
-        print(robots)
         return individual
+
+    def all_out_war(self,individual):
+        agent=self.Start_match(individual)
+        reslts=agent.robots_score
+        all_results=[[] for _ in range(len(self.dummies)+len(self.experts)+1)]
+        all_scores=[[] for _ in range(len(self.dummies)+len(self.experts)+1)]
+        iocane, dummies1 = self.match_dummies_iocain()
+        dvd=self.dummies_vs_dummies()
+        greenberg, dummies2 = self.match_dummies_greenberg()
+
+        #dummies:
+        for i in range(12):
+            all_results[i]=[score[0] for score in dvd[i]]+[dummies1[i][0]]+[dummies2[i][0]]+[reslts[i][0]]
+            all_scores[i]=[score[2] for score in dvd[i]]+[dummies1[i][2] ]+[dummies2[i][2]]+[reslts[i][2]]
+        all_results[12]=[green[0] for green in greenberg ]+[reslts[12][0]]
+        all_results[13]=[ioc[0] for ioc in iocane]+[reslts[13][0]]
+        all_results[14]=[res[0] for res in reslts]
+
+        all_scores[12]=[green[2] for green in greenberg ]+[reslts[12][0]]
+        all_scores[13]=[ioc[2] for ioc in iocane]+[reslts[13][0]]
+        all_scores[14]=[res[2] for res in reslts]
+
+        final_results=[sum(res)/len(res) for res in all_results]
+        final_score=[sum(score)/len(score) for score in all_scores]
+        return final_results,final_score
+
+
+
 
 def plot(fitness, iter, tag):
     for i in range(len(fitness)):
         plt.plot(iter, fitness,label="fitness" )
     plt.ylabel('fitness')
     plt.xlabel('iterations')
-    plt.title(inputs_for_testing[tag])
+    plt.title(tag)
     plt.legend()
     # plt.show()
-    CHECK_FOLDER = os.path.isdir(f"outputs\{inputs_for_testing[tag]}")
+    CHECK_FOLDER = os.path.isdir(f"outputs\{tag}")
     if not CHECK_FOLDER:
-        os.makedirs(f"outputs\{inputs_for_testing[tag]}")
-    plt.savefig(f"outputs\{inputs_for_testing[tag]}\{inputs_for_testing[tag]}-iter{iter[0]}.png")
+        os.makedirs(f"outputs\{tag}")
+    plt.savefig(f"outputs\{tag}\{tag}.png")
     plt.close()
 
 #get array of stats against robots
@@ -214,31 +286,36 @@ def border():
     print("----------------------------------")
 
 
-
+dict={0:"Anti Flat Player",1:"Copy Player",2:"Freq Player", 3:"Flat Player",
+       4:"Foxtrot Player" ,5:"Bruijn 81 Player", 6:"Pi Player" ,7:"226 Player",
+          8:"Random Player",9:"Rotating Player",10:"Switching Player",
+          11:"Switch a Lot Player",12:"greenberg",13:"iocaine" ,14:"Our Agent"}
 def main2():
-    name=input("enter a name for the results file:")
+    name=input("enter a name for the results file:\nthe results belong to the tournement between our agent against all other agents , not all participants against each other \n")
     rounds=int(input("enter number of rounds!:"))
     target_size=1000
     problem_set=RPS
-    max_iter=10
-    GA_POPSIZE=6
+    max_iter=int(input("enter number of max iterations !:"))
+    GA_POPSIZE=int(input("enter population size:"))
+    Check_experts=bool(int(input("check experts during co-evolution : \nnot recommended with high population size ,experts take too much time to think\ntrue: 1 \nfalse: 0")))
     solution = C_genetic_algorithem(GA_TARGET, target_size, GA_POPSIZE, problem_set, problem_set, CX_, 0, 3,
-                                    1, 1, 1, max_iter=max_iter,mutation_probability=1)
+                                    1, 1, 1, max_iter,Check_experts,mutation_probability=1)
     output, iter, sol, output2, sol2, network, population=solution.solve()
     results=[]
     match=Rashembo_Match()
     win_percentage=[]
-    plot(output, iter, 0)
+    plot(output, iter, name)
     for round in range(rounds):
         individual=match.Start_match(sol)
         results.append(individual.robots_score)
         win_percentage.append(individual.fitness)
     create_results_file(name,results,win_percentage)
+    for _ in range(5):
+        win_ratio,points=match.all_out_war(sol)
 
-
-    print(sol)
-
-
+        for i in range(len(win_ratio)):
+            print(fr"{dict[i]}'s win ratio is {int(100*win_ratio[i])}% and it's average score is {points[i]}")
+        print("\n")
 if __name__ == "__main__":
 
     main2()
