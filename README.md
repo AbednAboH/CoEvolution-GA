@@ -15,9 +15,10 @@ This project explores the application of co-evolutionary genetic algorithms to t
 ```
 CoEvolution-GA/
 │-- main.py                 # Main script coordinating the evolutionary process
+|-- Dummies.py              # Contains different RPS strategy implementations
 │-- Genetic.py              # Genetic algorithm core functionalities
 │-- Selection_methods.py    # Various selection strategies (e.g., tournament, roulette)
-│-- algorithms.py           # Contains different RPS strategy implementations
+│-- algorithms.py           # contains the basic Genetic algorithm emplementation
 │-- create_problem_sets.py  # Generates and manages opponent strategy sets
 │-- fitness_functions.py    # Defines evaluation functions for player/opponent strategies
 │-- function_selection.py   # Manages the selection of functions used during evolution
@@ -37,20 +38,29 @@ CoEvolution-GA/
 
 ```mermaid
 graph TD;
-    main.py -->|Manages Evolution| Genetic.py;
-    main.py -->|Uses Selection| Selection_methods.py;
-    main.py -->|Imports Strategies| algorithms.py;
-    main.py -->|Generates Opponent Data| create_problem_sets.py;
-    main.py -->|Evaluates Performance| fitness_functions.py;
-    main.py -->|Selects Functions| function_selection.py;
-    main.py -->|Applies Mutations| mutations.py;
-    Genetic.py -->|Uses Settings| settings.py;
-    Selection_methods.py -->|Depends on| settings.py;
-    algorithms.py -->|Depends on| settings.py;
-    create_problem_sets.py -->|Uses Config| settings.py;
-    fitness_functions.py -->|Uses Config| settings.py;
-    function_selection.py -->|Uses Config| settings.py;
-    mutations.py -->|Uses Config| settings.py;
+    main.py -->|Generates problem set structure| create_problem_sets.py;
+    main.py -->|requests required settings| settings;
+    main.py -->|Game between RPS & co-evolutionary agent|Genetic.py;
+    main.py -->|Game between RPS & RPS| Dummies.py
+
+    algorithms.py -->|Evaluates Fitness| fitness_functions.py;
+    algorithms.py -->|Manages Functions| function_selection.py;
+    algorithms.py -->|Handles Mutations| mutations.py;
+    algorithms.py -->|Handles Selection method| Selection_methods.py;
+
+    Genetic.py -->|Applies GA Operations| algorithms.py;
+    Genetic.py -->|Controls Evolution| algorithms.py;
+    Genetic.py -->|Configures Cross function| cross_types.py;
+
+
+    Dummies.py -->|Provides RPS Strategies| main.py;
+    Dummies.py -->|Provides RPS Strategies| Genetic.py;
+
+
+    cross_type --> settings.py
+    fitness_functions.py --> settings.py;
+    function_selection.py --> settings.py;
+    mutations.py --> settings.py;
 ```
 
 ## Implemented Strategies
@@ -99,6 +109,8 @@ Opponent: Freq Player - Win Ratio: 58%
 ...
 ```
 
+
+
 These results help analyze the effectiveness of the evolutionary process and suggest areas for further optimization.
 
 ## Running the Script
@@ -138,7 +150,7 @@ python main.py --generations 200 --population_size 100
 
 The `outputs/` directory contains logs and visualizations of the co-evolutionary process. Below is an example of a visualization showing the adaptation of strategies over generations:
 
-
+![image](https://github.com/user-attachments/assets/086f5aca-a623-48cc-a84f-98442c3da8bb)
 
 This image illustrates how player and opponent strategies co-evolve, highlighting the effectiveness of the approach.
 
