@@ -138,7 +138,7 @@ python main.py --generations 200 --population_size 100
 
 The `outputs/` directory contains logs and visualizations of the co-evolutionary process. Below is an example of a visualization showing the adaptation of strategies over generations:
 
-![Co-Evolutionary Process](img.png)
+
 
 This image illustrates how player and opponent strategies co-evolve, highlighting the effectiveness of the approach.
 
